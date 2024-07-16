@@ -11,6 +11,13 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/ros2d/build/ros2d.min.js"></script>
     <!-- Vuejs -->
     <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
+    <!-- Robot Model -->
+    <script src="./libs/three.js"></script>
+    <script src="./libs/ColladaLoader.js"></script>
+    <script src="./libs/ColladaLoader2.js"></script>
+    <script src="./libs/STLLoader.js"></script>
+    <script src="./libs/ros3d.min.js"></script>
+
 
     <style>
         body {
@@ -66,7 +73,7 @@
             border-radius: 20%;
         }
         .text-success {
-            margin-left: 10px; /* Adjust spacing to fit your layout */
+            margin-left: 10px;
         } 
         #dragstartzone {
             position: relative;
@@ -143,29 +150,29 @@
             </div>
             <div class="col-9">
                 <div class="row">
-                    <div class="col-4">
+                    <div class="col-6">
                         <div class="card mt-2">
                             <div class="card-header">
                                 <h4>Robot model</h4>
                             </div>
                             <div class="card-body">
-                            
+                                
                             </div>
                         </div>
                     </div>
-                    <div class="col-8">
+                    <div class="col-6">
                         <div class="card mt-2">
                             <div class="card-header">
                                 <h4>Generated Map</h4>
                             </div>
                             <div class="card-body">
-            
+                                <div id="div3DViewer"></div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-4">
+                    <div class="col-6">
                         <div class="card mt-2">
                             <div class="card-header">
                                 <h4>Camera</h4>
@@ -174,7 +181,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-8">
+                    <div class="col-6">
                         <div class="card mt-2">
                             <div class="card-header">
                                 <h4>Commands</h4>
