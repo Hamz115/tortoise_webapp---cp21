@@ -46,6 +46,7 @@ var app = new Vue({
                 this.connected = true
                 this.loading = false
                 this.setup3DViewer()
+                this.setCamera()
             })
             this.ros.on('error', (error) => {
                 this.logs.unshift((new Date()).toTimeString() + ` - Error: ${error}`)
@@ -56,11 +57,12 @@ var app = new Vue({
                 this.loading = false
                 this.unset3DViewer()
                 document.getElementById('map').innerHTML = ''
+                document.getElementById('divCamera').innerHTML = ''
             })
             this.mapViewer = new ROS2D.Viewer({
                 divID: 'map',
-                width: 420,
-                height: 360
+                width: 650,
+                height: 300
             })
 
             // Setup the map client.
@@ -136,7 +138,7 @@ var app = new Vue({
             this.viewer = new ROS3D.Viewer({
                 background: '#cccccc',
                 divID: 'div3DViewer',
-                width: 400,
+                width: 650,
                 height: 300,
                 antialias: true,
                 fixedFrame: 'odom'
@@ -172,6 +174,22 @@ var app = new Vue({
         },
         unset3DViewer() {
             document.getElementById('div3DViewer').innerHTML = ''
+        },
+        // camera properties
+        setCamera: function() {
+            let without_wss = this.rosbridge_address.split('wss://')[1]
+            console.log(without_wss)
+            let domain = without_wss.split('/')[0] + '/' + without_wss.split('/')[1]
+            console.log(domain)
+            let host = domain + '/cameras'
+            let viewer = new MJPEGCANVAS.Viewer({
+            divID: 'divCamera',
+            host: host,
+            width: 650,
+            height: 300,
+            topic: '/camera/image_raw',
+            ssl: true,
+            })
         },
     },
     mounted() {
