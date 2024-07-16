@@ -29,6 +29,10 @@ var app = new Vue({
         viewer: null,
         tfClient: null,
         urdfClient: null,
+        // map stuff
+        mapViewer: null,
+        mapGridClient: null,
+        interval: null,
     },
     // helper methods to connect to ROS
     methods: {
@@ -51,7 +55,27 @@ var app = new Vue({
                 this.connected = false
                 this.loading = false
                 this.unset3DViewer()
+                document.getElementById('map').innerHTML = ''
             })
+            this.mapViewer = new ROS2D.Viewer({
+                divID: 'map',
+                width: 420,
+                height: 360
+            })
+
+            // Setup the map client.
+            this.mapGridClient = new ROS2D.OccupancyGridClient({
+                ros: this.ros,
+                rootObject: this.mapViewer.scene,
+                continuous: true,
+            })
+            // Scale the canvas to fit to the map
+            this.mapGridClient.on('change', () => {
+                this.mapViewer.scaleToDimensions(this.mapGridClient.currentGrid.width, this.mapGridClient.currentGrid.height);
+            this.mapViewer.shift(this.mapGridClient.currentGrid.pose.position.x, this.mapGridClient.currentGrid.pose.position.y)
+            })
+
+
         },
         disconnect: function() {
             this.ros.close()
