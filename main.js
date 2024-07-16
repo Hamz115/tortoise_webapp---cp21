@@ -7,7 +7,14 @@ var app = new Vue({
         logs: [],
         loading: false,
         rosbridge_address: 'wss://i-0d542c199e93bd40e.robotigniteacademy.com/dbf475b9-8daf-452f-80a0-548ec0ae9129/rosbridge/',
-        port: '9090',  
+        port: '9090',
+        goal: null,
+        action: {
+            goal: { position: {x: 0, y: 0, z: 0} },
+            feedback: { position: 0, state: 'idle' },
+            result: { success: false },
+            status: { status: 0, text: '' },
+        },  
         // dragging data
         dragging: false,
         x: 'no',
@@ -47,6 +54,7 @@ var app = new Vue({
                 this.loading = false
                 this.setup3DViewer()
                 this.setCamera()
+                this.pubInterval = setInterval(this.publish, 100)
             })
             this.ros.on('error', (error) => {
                 this.logs.unshift((new Date()).toTimeString() + ` - Error: ${error}`)
@@ -62,7 +70,7 @@ var app = new Vue({
             this.mapViewer = new ROS2D.Viewer({
                 divID: 'map',
                 width: 650,
-                height: 300
+                height: 360
             })
 
             // Setup the map client.
@@ -81,6 +89,50 @@ var app = new Vue({
         },
         disconnect: function() {
             this.ros.close()
+            this.goal = null
+        },
+        publish: function() {
+            let topic = new ROSLIB.Topic({
+                ros: this.ros,
+                name: '/cmd_vel',
+                messageType: 'geometry_msgs/Twist'
+            })
+            let message = new ROSLIB.Message({
+                linear: { x: this.joystick.vertical, y: 0, z: 0, },
+                angular: { x: 0, y: 0, z: -this.joystick.horizontal, },
+            })
+            topic.publish(message)
+        },
+        sendGoal: function() {
+            let actionClient = new ROSLIB.ActionClient({
+                ros : this.ros,
+                serverName : '/tortoisebot_as',
+                actionName : 'course_web_dev_ros/WaypointActionAction'
+            })
+
+            this.goal = new ROSLIB.Goal({
+                actionClient : actionClient,
+                goalMessage: {
+                    ...this.action.goal
+                }
+            })
+
+            this.goal.on('status', (status) => {
+                this.action.status = status
+            })
+
+            this.goal.on('feedback', (feedback) => {
+                this.action.feedback = feedback
+            })
+
+            this.goal.on('result', (result) => {
+                this.action.result = result
+            })
+
+            this.goal.send()
+        },
+        cancelGoal: function() {
+            this.goal.cancel()
         },
         // joystick functionality
         sendCommand: function() {
@@ -133,20 +185,26 @@ var app = new Vue({
             this.joystick.vertical = 0
             this.joystick.horizontal = 0
         },
+        setGoal: function(x, y) {
+            this.action.goal.position.x = x;
+            this.action.goal.position.y = y;
+        },
+        // Publisher
+        pubInterval: null,
         // 3D visualization
         setup3DViewer() {
             this.viewer = new ROS3D.Viewer({
                 background: '#cccccc',
                 divID: 'div3DViewer',
                 width: 650,
-                height: 300,
+                height: 360,
                 antialias: true,
                 fixedFrame: 'odom'
             })
 
             // Add a grid.
             this.viewer.addObject(new ROS3D.Grid({
-                color:'#0181c4',
+                color:'#BA0021',
                 cellSize: 0.5,
                 num_cells: 20
             }))
@@ -186,7 +244,7 @@ var app = new Vue({
             divID: 'divCamera',
             host: host,
             width: 650,
-            height: 300,
+            height: 450,
             topic: '/camera/image_raw',
             ssl: true,
             })

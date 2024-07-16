@@ -74,6 +74,24 @@
             margin-left: 10px;
             border-radius: 20%;
         }
+        .command { 
+            background-color: #dfd3c3;
+        }
+        .model {
+            background-color: #596e79;
+        }
+        .map {
+            background-color: #3a7563;
+        }
+        .cam {
+            background-color: #b5592a;
+        }
+        .joy {
+            background-color: #49493c;
+        }
+        .con {
+            background-color: white;
+        }
         .text-success {
             margin-left: 10px;
         } 
@@ -125,7 +143,7 @@
                     </div>
                 </div>
                 <div class="card mt-2">
-                    <div class="card-header">
+                    <div class="card-header con">
                         <h4>Console Logs</h4>
                     </div>
                     <div class="card-body console">
@@ -133,7 +151,7 @@
                     </div>
                 </div>
                 <div class="card mt-2">
-                    <div class="card-body text-center">
+                    <div class="card-body text-center joy">
                         <h2 class="text-center">Joystick Control</h2>
                         <hr>
                         <div id="dragstartzone" @mousedown="startDrag" @mousemove="doDrag"></div>
@@ -141,12 +159,12 @@
                     </div>
                 </div>
                 <div class="card mt-2">
-                    <div class="card-body">
+                    <div class="card-body joy">
                         <h2 class="text-center">Joystick values</h2>
                         <hr>
-                        <p>Linear: {{ joystick.vertical.toFixed(3) }}</p>
+                        <p>Linear: {{1* joystick.vertical.toFixed(3) }}</p>
                         <br>
-                        <p>Angular: {{ joystick.horizontal.toFixed(3) }}</p>
+                        <p>Angular: {{1* joystick.horizontal.toFixed(3) }}</p>
                     </div>
                 </div>
             </div>
@@ -154,20 +172,20 @@
                 <div class="row">
                     <div class="col-6">
                         <div class="card mt-2">
-                            <div class="card-header">
+                            <div class="card-header model">
                                 <h4>Robot model</h4>
                             </div>
-                            <div class="card-body">
+                            <div class="card-body model">
                                 <div id="div3DViewer"></div>
                             </div>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="card mt-2">
-                            <div class="card-header">
+                            <div class="card-header map">
                                 <h4>Generated Map</h4>
                             </div>
-                            <div class="card-body">
+                            <div class="card-body map">
                                 <div id="map"></div>
                             </div>
                         </div>
@@ -176,20 +194,46 @@
                 <div class="row">
                     <div class="col-6">
                         <div class="card mt-2">
-                            <div class="card-header">
+                            <div class="card-header cam">
                                 <h4>Camera</h4>
                             </div>
-                            <div class="card-body">
+                            <div class="card-body cam">
                                 <div id="divCamera"></div>
                             </div>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="card mt-2">
-                            <div class="card-header">
+                            <div class="card-header command">
                                 <h4>Commands</h4>
                             </div>
-                            <div class="card-body">
+                            <div class="card-body command">
+                                <div>
+                                    <div class="row">
+                                    <button class="btn btn-waypoint btn-block mt-2 col-6" @click="setGoal(0.65, -0.5)">Waypoint 1:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X: &nbsp;0.65, &nbsp;Y: -0.5</button>
+                                    <button class="btn btn-waypoint btn-block mt-2 col-6" @click="setGoal(0.65, 0.45)">Waypoint 2:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X: &nbsp;0.65, &nbsp;Y: &nbsp;0.45</button>
+                                    </div>
+                                    <div class="row">
+                                    <button class="btn btn-waypoint btn-block mt-2 col-6" @click="setGoal(0.25, 0.45)">Waypoint 3:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X: &nbsp;0.25, &nbsp;Y: &nbsp;0.45</button>
+                                    <button class="btn btn-waypoint btn-block mt-2 col-6" @click="setGoal(0.25, 0.00)">Waypoint 4:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X: &nbsp;0.25, &nbsp;Y: &nbsp;0.00</button>
+                                    </div>
+                                    <div class="row">
+                                    <button class="btn btn-waypoint btn-block mt-2 col-6" @click="setGoal(-0.15, 0.00)">Waypoint 5:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X: -0.15,      &nbsp;Y: &nbsp;0.00</button>
+                                    <button class="btn btn-waypoint btn-block mt-2 col-6" @click="setGoal(-0.15, 0.45)">Waypoint 6:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X: -0.15,      &nbsp;Y: &nbsp;0.45</button>
+                                    </div>
+                                    <div class="row">
+                                    <button class="btn btn-waypoint btn-block mt-2 col-6" @click="setGoal(-0.65, 0.45)">Waypoint 7:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X: -0.65,      &nbsp;Y: &nbsp;0.45</button>
+                                    <button class="btn btn-waypoint btn-block mt-2 col-6" @click="setGoal(-0.15, -0.5)">Waypoint 8:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X: -0.15,      &nbsp;Y: -0.50</button>
+                                    </div>
+                                    <button class="btn btn-waypoint btn-block mt-2" @click="setGoal(-0.5, -0.5)">Waypoint 9:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X: -0.50,      &nbsp;Y: -0.50</button>
+                                </div>
+                                <button :disabled="!connected || action.status.status == 1" class="btn btn-success btn-block mt-2" @click="sendGoal">Start</button>
+                                <button :disabled="!connected || ![1].includes(action.status.status)" class="btn btn-danger btn-block mt-2" @click="cancelGoal">Cancel</button>
+                                <hr />
+                                <div class="card-body text-left">
+                                    <h5>Current Goal: (X: {{ action.goal.position.x }}, Y: {{ action.goal.position.y }})</h5> 
+                                    <h5>Succeeded: {{ action.result.success }}</h5>
+                                </div>
                             </div>
                         </div>
                     </div>
