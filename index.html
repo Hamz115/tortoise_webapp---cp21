@@ -1,213 +1,205 @@
 <html>
 
-​
-
 <head>
-
     <!-- Bootstrap -->
-
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
-
      crossorigin="anonymous">
-
     <!-- ROS stuff -->
-
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/eventemitter2/lib/eventemitter2.min.js">
-
-​
-
-    </script>
-
-    <script type="text/javascript" src="https://s3.eu-west-1.amazonaws.com/rosject.io/js/roslib.min.js">
-
-​
-
-    </script>
-
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/easeljs/lib/easeljs.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/eventemitter2/lib/eventemitter2.min.js"></script>
+    <script type="text/javascript" src="https://s3.eu-west-1.amazonaws.com/rosject.io/js/roslib.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/ros2d/build/ros2d.min.js"></script>
     <!-- Vuejs -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js">
+    <style>
+        body {
+            background-color: #B2FFFF;
+            color: #e0e0e0;
+        }
+        .card {
+            background-color: #F0E68C;
+            border: 1px solid #333;
+        }
+        .card-header, .card-body {
+            color: #002244;
+        }
+        .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+        .btn-danger {
+            background-color: #1e1e1e;
+            border-color: #dc3545;
+        }
+        .text-danger {
+            color: #dc3545 !important;
+        }
+        .text-success {
+            color: #28a745 !important;
+        }
+        input {
+            background-color: #333;
+            color: #e0e0e0;
+            border: 1px solid #555;
+        }
+        .input-group-text {
+            background-color: #333;
+            color: #e0e0e0;
+            border: 1px solid #555;
+        }
+        .console {
+            background-color: #000;
+            color: #e0e0e0;
+            font-family: monospace;
+            padding: 10px;
+            height: 200px;
+            overflow-y: auto;
+            border: 1px solid #333;
+            text-align: left;
+        }
+        .led-indicator {
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+            margin-left: 10px;
+            border-radius: 20%;
+        }
+        .text-success {
+            margin-left: 10px; /* Adjust spacing to fit your layout */
+        } 
+        #dragstartzone {
+            position: relative;
+            display: inline-block;
+            width: 200px;
+            height: 200px;
+            border: 1px solid #333;
+            border-radius: 50%;
+            z-index: 10;
+            -moz-user-select: -moz-none;
+            -khtml-user-select: none;
+            -webkit-user-select: none;
+        }
 
-​
+        #dragCircle {
+            position: absolute;
+            z-index: 9;
+            border: 1px solid transparent;
+            border-radius: 50%;
+            background-color: rgba(0, 0, 0, 30%);
+            -moz-user-select: -moz-none;
+            -khtml-user-select: none;
+            -webkit-user-select: none;
+        }
 
-    </script>
-
+        #dragCircle:hover {
+            background-color: green;
+        }  
+    </style>
 </head>
 
-​
-
 <body>
-
     <div id="app" class="container-fluid">
-
         <div class="row">
-
             <div class="col-3 text-center">
-
                 <div class="card mt-2">
-
                     <div class="card-body">
-
-                        <h3>Connection status</h3>
-
-                        <p class="text-danger" v-if="!connected">Not connected!</p>
-
-                        <p class="text-success" v-if="connected">Connected!</p>
-
+                        <h3>Connection Status</h3>
                         <label>ROSBridge address</label>
-
                         <br>
-
                         <input type="text" v-model="rosbridge_address" />
-
+                        <!-- Conditional rendering for connection status text -->
+                        <span class="text-success" v-if="connected">Connected</span>
                         <br><br>
-
-                        <button :disabled="loading" class="btn btn-danger" @click="disconnect"
-
-                            v-if="connected">Disconnect!</button>
-
-                        <button :disabled="loading" class="btn btn-success" @click="connect" v-else>Connect!</button>
-
+                        <button :disabled="loading" class="btn btn-danger" @click="disconnect" v-if="connected">Disconnect</button>
+                        <button :disabled="loading" class="btn btn-success" @click="connect" v-else>Connect</button>
                     </div>
-
                 </div>
-
                 <div class="card mt-2">
-
                     <div class="card-header">
-
-                        <h4>Logs</h5>
-
+                        <h4>Console Logs</h4>
                     </div>
-
-                    <div class="card-body">
-
+                    <div class="card-body console">
                         <p v-for="log in logs">{{ log }}</p>
-
                     </div>
-
                 </div>
-
+                <div class="card mt-2">
+                    <div class="card-body text-center">
+                        <h2 class="text-center">Joystick Control</h2>
+                        <hr>
+                        <div id="dragstartzone" @mousedown="startDrag" @mousemove="doDrag"></div>
+                        <div id="dragCircle" :style="dragCircleStyle"></div>
+                    </div>
+                </div>
+                <div class="card mt-2">
+                    <div class="card-body">
+                        <h2 class="text-center">Joystick values</h2>
+                        <hr>
+                        <p>Linear: {{ joystick.vertical.toFixed(3) }}</p>
+                        <br>
+                        <p>Angular: {{ joystick.horizontal.toFixed(3) }}</p>
+                    </div>
+                </div>
             </div>
-
             <div class="col-9">
-
-                <h3>Controls</h3>
-
                 <div class="row">
-
                     <div class="col-4">
-
                         <div class="card mt-2">
-
                             <div class="card-header">
-
                                 <h4>Robot model</h4>
-
                             </div>
-
                             <div class="card-body">
-
+                            
                             </div>
-
                         </div>
-
                     </div>
-
                     <div class="col-8">
-
                         <div class="card mt-2">
-
                             <div class="card-header">
-
                                 <h4>Generated Map</h4>
-
                             </div>
-
                             <div class="card-body">
-
+            
                             </div>
-
                         </div>
-
                     </div>
-
                 </div>
-
                 <div class="row">
-
                     <div class="col-4">
-
                         <div class="card mt-2">
-
                             <div class="card-header">
-
                                 <h4>Camera</h4>
-
                             </div>
-
                             <div class="card-body">
-
                             </div>
-
                         </div>
-
                     </div>
-
                     <div class="col-8">
-
                         <div class="card mt-2">
-
                             <div class="card-header">
-
                                 <h4>Commands</h4>
-
                             </div>
-
                             <div class="card-body">
-
                             </div>
-
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
-
         </div>
-
     </div>
 
-​
-
     <script type="text/javascript">
-
         // We could have loaded main.js simply with:
-
         //  <script type="text/javascript" src="main.js">
-
         //
-
         // BUT we were having caching-related problems.
-
         // Loading main.js with a Date.now() in the URL we avoid using cache
 
-​
-
         var script = document.createElement('script');
-
         script.type = 'text/javascript';
-
         script.src = 'main.js?v=11.' + Date.now();
-
         document.head.appendChild(script);
-
     </script>
-
 </body>
-
-​
 
 </html>
