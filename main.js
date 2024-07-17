@@ -6,7 +6,7 @@ var app = new Vue({
         ros: null,
         logs: [],
         loading: false,
-        rosbridge_address: 'wss://i-0d542c199e93bd40e.robotigniteacademy.com/dbf475b9-8daf-452f-80a0-548ec0ae9129/rosbridge/',
+        rosbridge_address: 'wss://i-083b3b6e336121762.robotigniteacademy.com/63de8c2e-98e8-4c6c-bb9e-d586ac988c71/rosbridge/',
         port: '9090',
         goal: null,
         action: {
@@ -81,8 +81,8 @@ var app = new Vue({
             })
             // Scale the canvas to fit to the map
             this.mapGridClient.on('change', () => {
-                this.mapViewer.scaleToDimensions(this.mapGridClient.currentGrid.width, this.mapGridClient.currentGrid.height);
-            this.mapViewer.shift(this.mapGridClient.currentGrid.pose.position.x, this.mapGridClient.currentGrid.pose.position.y)
+                this.mapViewer.scaleToDimensions(0.15 * this.mapGridClient.currentGrid.width, 0.15 * this.mapGridClient.currentGrid.height);
+                this.mapViewer.shift(0.15 * this.mapGridClient.currentGrid.pose.position.x, 0.15 * this.mapGridClient.currentGrid.pose.position.y)
             })
 
 
@@ -256,5 +256,6 @@ var app = new Vue({
                 this.ros.getNodes((data) => { }, (error) => { })
             }
         }, 10000)
+        window.addEventListener('mouseup', this.stopDrag)
     },
 })
