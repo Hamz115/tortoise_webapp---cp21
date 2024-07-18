@@ -6,7 +6,7 @@ var app = new Vue({
         ros: null,
         logs: [],
         loading: false,
-        rosbridge_address: 'wss://i-083b3b6e336121762.robotigniteacademy.com/63de8c2e-98e8-4c6c-bb9e-d586ac988c71/rosbridge/',
+        rosbridge_address: 'wss://i-09e03dfaefc03b18b.robotigniteacademy.com/4c5d9069-c542-4faa-bb5a-45e8ff3d3e90/rosbridge/',
         port: '9090',
         goal: null,
         action: {
